@@ -1,0 +1,54 @@
+// Reglas de Firestore que debes configurar en Firebase Console
+// Ve a Firebase Console > Firestore Database > Rules y reemplaza las reglas existentes con estas:
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permitir lectura y escritura a usuarios autenticados en la colección 'users'
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Permitir lectura y escritura a usuarios autenticados en otras colecciones
+    match /orders/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /restaurants/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /drivers/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /businesses/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Permitir operaciones en productos para usuarios autenticados
+    match /products/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Permitir escritura temporal para testing (REMOVER EN PRODUCCIÓN)
+    match /test/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+
+// INSTRUCCIONES:
+// 1. Ve a https://console.firebase.google.com/
+// 2. Selecciona tu proyecto 'rapiflow-b31de'
+// 3. Ve a 'Firestore Database' en el menú lateral
+// 4. Haz clic en la pestaña 'Rules'
+// 5. Reemplaza las reglas existentes con las de arriba
+// 6. Haz clic en 'Publish' para aplicar los cambios
+
+// NOTA IMPORTANTE:
+// Estas reglas permiten que usuarios autenticados lean y escriban datos.
+// En producción, deberías hacer las reglas más restrictivas según tus necesidades específicas.
