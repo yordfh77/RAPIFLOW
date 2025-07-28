@@ -151,7 +151,7 @@ const RegisterScreen = ({ navigation }) => {
         {/* Logo con ícono y texto */}
         <View style={styles.logoContainer}>
           <View style={styles.logoIconContainer}>
-            <Ionicons name="flash" size={40} color="#FFFFFF" />
+            <Ionicons name="flash" size={40} color="#FF6B35" />
           </View>
           <Text style={styles.logoText}>RapiFlow</Text>
           <Text style={styles.logoSubtext}>Rapidez con estilo cubano</Text>
