@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput, ActivityIndicator, Image } from 'react-native';
 import { Card, Button, Switch, FAB, Modal, Portal, Chip } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 // import * as ImagePicker from 'expo-image-picker'; // Temporalmente deshabilitado
@@ -22,6 +22,11 @@ const BusinessProductsScreen = ({ navigation, route }) => {
 
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [showAddModal, setShowAddModal] = useState(false);
+  
+  // Debug: Log cuando cambia el estado del modal
+  useEffect(() => {
+    console.log('Modal state changed:', showAddModal);
+  }, [showAddModal]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -264,6 +269,7 @@ const BusinessProductsScreen = ({ navigation, route }) => {
   );
 
   return (
+    <>
     <View style={globalStyles.container}>
       {/* Header */}
       <View style={styles.header}>
@@ -350,13 +356,11 @@ const BusinessProductsScreen = ({ navigation, route }) => {
                   </View>
                 </View>
                 
-                {/* Temporalmente comentado para evitar errores de build
                 {product.image && (
                   <View style={styles.productImageContainer}>
                     <Image source={{ uri: product.image }} style={styles.productCardImage} />
                   </View>
                 )}
-                */}
                 
                 <Text style={styles.productDescription}>{product.description}</Text>
                 
@@ -421,38 +425,102 @@ const BusinessProductsScreen = ({ navigation, route }) => {
               </Card.Content>
             </Card>
           ))
-        )}
-      </ScrollView>
+        )}      </ScrollView>
 
-      {/* Modal para agregar/editar producto */}
-      <Portal>
-        <Modal
-          visible={showAddModal}
-          onDismiss={() => {
-            setShowAddModal(false);
-            resetForm();
-          }}
-          contentContainerStyle={styles.modalContainer}
-        >
+      {/* FAB para agregar producto */}
+      <FAB
+        style={styles.fab}
+        icon="plus"
+        onPress={() => {
+          console.log('FAB pressed, current showAddModal:', showAddModal);
+          setShowAddModal(true);
+          console.log('showAddModal set to true');
+        }}
+        color="#FFFFFF"
+      />
+    </View>
+
+    {/* Modal para agregar/editar producto */}
+    {showAddModal && (
+      <View style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 9999,
+        padding: 20
+      }}>
+          <View style={{
+            backgroundColor: 'white',
+            borderRadius: 10,
+            padding: 20,
+            width: '100%',
+            maxWidth: 500,
+            maxHeight: '90%'
+          }}>
+            <TouchableOpacity
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                zIndex: 1001,
+                backgroundColor: '#f0f0f0',
+                borderRadius: 15,
+                width: 30,
+                height: 30,
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}
+              onPress={() => {
+                setShowAddModal(false);
+                resetForm();
+              }}
+            >
+              <Ionicons name="close" size={20} color="#666" />
+            </TouchableOpacity>
           <ScrollView>
-            <Text style={styles.modalTitle}>
+            <Text style={{
+              fontSize: 20,
+              fontWeight: 'bold',
+              textAlign: 'center',
+              marginBottom: 20,
+              color: '#333'
+            }}>
               {editingProduct ? 'Editar Producto' : 'Agregar Producto'}
             </Text>
             
-            <View style={styles.formGroup}>
-              <Text style={styles.formLabel}>Nombre del producto *</Text>
+            <View style={{ marginBottom: 15 }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 8, color: '#333' }}>Nombre del producto *</Text>
               <TextInput
-                style={styles.formInput}
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#ddd',
+                  borderRadius: 8,
+                  padding: 12,
+                  fontSize: 16
+                }}
                 value={newProduct.name}
                 onChangeText={(text) => setNewProduct({...newProduct, name: text})}
                 placeholder="Ej: Ropa Vieja"
               />
             </View>
             
-            <View style={styles.formGroup}>
-              <Text style={styles.formLabel}>Descripción</Text>
+            <View style={{ marginBottom: 15 }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 8, color: '#333' }}>Descripción</Text>
               <TextInput
-                style={[styles.formInput, styles.textArea]}
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#ddd',
+                  borderRadius: 8,
+                  padding: 12,
+                  fontSize: 16,
+                  height: 80,
+                  textAlignVertical: 'top'
+                }}
                 value={newProduct.description}
                 onChangeText={(text) => setNewProduct({...newProduct, description: text})}
                 placeholder="Describe tu producto..."
@@ -461,61 +529,47 @@ const BusinessProductsScreen = ({ navigation, route }) => {
               />
             </View>
             
-            {/* Sección de imagen - Temporalmente comentada para evitar errores de build
-            <View style={styles.formGroup}>
-              <Text style={styles.formLabel}>Imagen del producto</Text>
+            <View style={{ marginBottom: 15 }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 8, color: '#333' }}>Imagen del producto</Text>
               {newProduct.image ? (
-                <View style={styles.imageContainer}>
-                  <Image source={{ uri: newProduct.image }} style={styles.productImage} />
-                  <View style={styles.imageActions}>
-                    <Button
-                      mode="outlined"
-                      onPress={selectImage}
-                      style={styles.changeImageButton}
-                      labelStyle={styles.changeImageText}
-                      icon="camera"
-                      compact
-                    >
+                <View style={{ alignItems: 'center' }}>
+                  <Image source={{ uri: newProduct.image }} style={{ width: 200, height: 150, borderRadius: 8, marginBottom: 10 }} />
+                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                    <Button mode="outlined" onPress={selectImage} icon="camera" compact>
                       Cambiar
                     </Button>
-                    <Button
-                      mode="outlined"
-                      onPress={removeImage}
-                      style={styles.removeImageButton}
-                      labelStyle={styles.removeImageText}
-                      icon="trash-can"
-                      compact
-                    >
+                    <Button mode="outlined" onPress={removeImage} icon="trash-can" compact>
                       Eliminar
                     </Button>
                   </View>
                 </View>
               ) : (
-                <>
-                  <Button
-                    mode="outlined"
-                    onPress={() => {
-                      console.log('Add image button pressed');
-                      selectImage();
-                    }}
-                    style={styles.addImageButton}
-                    contentStyle={{ height: 80, flexDirection: 'column' }}
-                    labelStyle={styles.addImageText}
-                    icon="camera"
-                  >
-                    Agregar imagen
-                  </Button>
-                  <Text style={styles.addImageSubtext}>Toca para tomar foto o seleccionar de galería</Text>
-                </>
+                <Button
+                  mode="outlined"
+                  onPress={selectImage}
+                  style={{
+                    borderStyle: 'dashed',
+                    borderColor: '#FF6B35',
+                    padding: 20
+                  }}
+                  icon="camera"
+                >
+                  Agregar imagen
+                </Button>
               )}
             </View>
-            */}
             
-            <View style={styles.formRow}>
-              <View style={styles.formGroupHalf}>
-                <Text style={styles.formLabel}>Precio *</Text>
+            <View style={{ flexDirection: 'row', gap: 15, marginBottom: 15 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 8, color: '#333' }}>Precio *</Text>
                 <TextInput
-                  style={styles.formInput}
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#ddd',
+                    borderRadius: 8,
+                    padding: 12,
+                    fontSize: 16
+                  }}
                   value={newProduct.price}
                   onChangeText={(text) => setNewProduct({...newProduct, price: text})}
                   placeholder="0"
@@ -523,10 +577,16 @@ const BusinessProductsScreen = ({ navigation, route }) => {
                 />
               </View>
               
-              <View style={styles.formGroupHalf}>
-                <Text style={styles.formLabel}>Tiempo (min)</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 8, color: '#333' }}>Tiempo (min)</Text>
                 <TextInput
-                  style={styles.formInput}
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#ddd',
+                    borderRadius: 8,
+                    padding: 12,
+                    fontSize: 16
+                  }}
                   value={newProduct.preparationTime}
                   onChangeText={(text) => setNewProduct({...newProduct, preparationTime: text})}
                   placeholder="15"
@@ -535,22 +595,27 @@ const BusinessProductsScreen = ({ navigation, route }) => {
               </View>
             </View>
             
-            <View style={styles.formGroup}>
-              <Text style={styles.formLabel}>Categoría</Text>
-              <View style={styles.categorySelector}>
+            <View style={{ marginBottom: 15 }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 8, color: '#333' }}>Categoría</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                 {categories.map((category) => (
                   <TouchableOpacity
                     key={category}
-                    style={[
-                      styles.categorySelectorItem,
-                      newProduct.category === category && styles.categorySelectorItemActive
-                    ]}
+                    style={{
+                      backgroundColor: newProduct.category === category ? '#FF6B35' : '#f5f5f5',
+                      paddingHorizontal: 12,
+                      paddingVertical: 8,
+                      borderRadius: 15,
+                      marginRight: 8,
+                      marginBottom: 8
+                    }}
                     onPress={() => setNewProduct({...newProduct, category: category})}
                   >
-                    <Text style={[
-                      styles.categorySelectorText,
-                      newProduct.category === category && styles.categorySelectorTextActive
-                    ]}>
+                    <Text style={{
+                      color: newProduct.category === category ? 'white' : '#666',
+                      fontSize: 12,
+                      fontWeight: '600'
+                    }}>
                       {category}
                     </Text>
                   </TouchableOpacity>
@@ -558,65 +623,57 @@ const BusinessProductsScreen = ({ navigation, route }) => {
               </View>
             </View>
             
-            <View style={styles.formGroup}>
-              <Text style={styles.formLabel}>Ingredientes</Text>
+            <View style={{ marginBottom: 15 }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 8, color: '#333' }}>Ingredientes</Text>
               <TextInput
-                style={styles.formInput}
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#ddd',
+                  borderRadius: 8,
+                  padding: 12,
+                  fontSize: 16
+                }}
                 value={newProduct.ingredients}
                 onChangeText={(text) => setNewProduct({...newProduct, ingredients: text})}
                 placeholder="Separados por comas: Carne, Cebolla, Tomate..."
               />
             </View>
             
-            <View style={styles.formGroup}>
-              <View style={styles.switchContainer}>
-                <Text style={styles.formLabel}>Producto disponible</Text>
-                <Switch
-                  value={newProduct.available}
-                  onValueChange={(value) => setNewProduct({...newProduct, available: value})}
-                  color="#FF6B35"
-                />
-              </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: '#333' }}>Producto disponible</Text>
+              <Switch
+                value={newProduct.available}
+                onValueChange={(value) => setNewProduct({...newProduct, available: value})}
+                color="#FF6B35"
+              />
             </View>
             
-            <View style={styles.modalActions}>
+            <View style={{ flexDirection: 'row', gap: 15 }}>
               <Button
                 mode="outlined"
                 onPress={() => {
                   setShowAddModal(false);
                   resetForm();
                 }}
-                style={styles.cancelButton}
-                labelStyle={styles.cancelButtonText}
+                style={{ flex: 1 }}
               >
                 Cancelar
               </Button>
               <Button
                 mode="contained"
-                onPress={() => {
-                  console.log('Save button pressed');
-                  saveProduct();
-                }}
-                style={styles.saveButton}
-                labelStyle={styles.saveButtonText}
+                onPress={saveProduct}
+                style={{ flex: 1, backgroundColor: '#FF6B35' }}
                 loading={saving}
                 disabled={saving}
               >
-                {saving ? 'Guardando...' : (editingProduct ? 'Actualizar' : 'Aceptar')}
+                {saving ? 'Guardando...' : (editingProduct ? 'Actualizar' : 'Guardar')}
               </Button>
             </View>
           </ScrollView>
-        </Modal>
-      </Portal>
-
-      {/* FAB para agregar producto */}
-      <FAB
-        style={styles.fab}
-        icon="plus"
-        onPress={() => setShowAddModal(true)}
-        color="#FFFFFF"
-      />
-    </View>
+          </View>
+        </View>
+      )}
+    </>
   );
 };
 
@@ -794,13 +851,7 @@ const styles = StyleSheet.create({
   deleteButton: {
     padding: 8,
   },
-  modalContainer: {
-    backgroundColor: '#FFFFFF',
-    margin: 20,
-    borderRadius: 10,
-    padding: 20,
-    maxHeight: '80%',
-  },
+
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -903,6 +954,16 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 8,
     marginBottom: 10,
+  },
+  productImageContainer: {
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  productCardImage: {
+    width: '100%',
+    height: 120,
+    borderRadius: 8,
+    resizeMode: 'cover',
   },
   imageActions: {
     flexDirection: 'row',
