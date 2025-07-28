@@ -28,6 +28,7 @@
     },
     "plugins": [
       "expo-location"
-    ]
+    ],
+    "platforms": ["ios", "android", "web"]
   }
 }
