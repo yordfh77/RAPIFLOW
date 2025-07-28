@@ -46,6 +46,17 @@ firebase-debug.log
 *.swp
 *.swo
 
+# Problematic image files
+*.jpg
+*.jpeg
+*.png
+*.webp
+!assets/*.png
+!assets/icon.png
+!assets/favicon.png
+!assets/adaptive-icon.png
+!assets/splash.png
+
 # OS generated files
 Thumbs.db
 ehthumbs.db
