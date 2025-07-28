@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
 import { Card, Button, Switch, Avatar, Modal, Portal, Divider, FAB } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { theme, styles as globalStyles } from '../theme/theme';

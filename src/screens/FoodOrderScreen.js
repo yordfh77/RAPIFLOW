@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Card, Button, Badge, Searchbar } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { theme, styles as globalStyles } from '../theme/theme';
@@ -239,21 +239,7 @@ const FoodOrderScreen = ({ navigation, route }) => {
                   <Card.Content>
                     <View style={styles.productContent}>
                       <View style={styles.productImage}>
-                        {product.image && product.image.startsWith('http') ? (
-                          <>
-                            <Image 
-                              source={{ uri: product.image }} 
-                              style={styles.productImageReal}
-                              onError={() => {
-                                // Si la imagen falla al cargar, mostrar emoji
-                                console.log('Error cargando imagen del producto:', product.name);
-                              }}
-                            />
-                            <Text style={styles.productEmojiOverlay}>{getProductEmoji(product.name, product.category)}</Text>
-                          </>
-                        ) : (
-                          <Text style={styles.productEmoji}>{getProductEmoji(product.name, product.category)}</Text>
-                        )}
+                        <Text style={styles.productEmoji}>{getProductEmoji(product.name, product.category)}</Text>
                       </View>
                       <View style={styles.productDetails}>
                         <Text style={styles.productName}>{product.name}</Text>
@@ -552,27 +538,7 @@ const styles = StyleSheet.create({
   productEmoji: {
     fontSize: 24,
   },
-  productImageReal: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    position: 'absolute',
-  },
-  productEmojiOverlay: {
-    fontSize: 16,
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    paddingHorizontal: 2,
-    paddingVertical: 1,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1,
-  },
+
   productDetails: {
     flex: 1,
     marginLeft: 15,

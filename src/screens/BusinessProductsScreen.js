@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput, ActivityIndicator } from 'react-native';
 import { Card, Button, Switch, FAB, Modal, Portal, Chip } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
+// import * as ImagePicker from 'expo-image-picker'; // Temporalmente deshabilitado
 import { theme, styles as globalStyles } from '../theme/theme';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -350,11 +350,13 @@ const BusinessProductsScreen = ({ navigation, route }) => {
                   </View>
                 </View>
                 
+                {/* Temporalmente comentado para evitar errores de build
                 {product.image && (
                   <View style={styles.productImageContainer}>
                     <Image source={{ uri: product.image }} style={styles.productCardImage} />
                   </View>
                 )}
+                */}
                 
                 <Text style={styles.productDescription}>{product.description}</Text>
                 
@@ -459,7 +461,7 @@ const BusinessProductsScreen = ({ navigation, route }) => {
               />
             </View>
             
-            {/* Sección de imagen */}
+            {/* Sección de imagen - Temporalmente comentada para evitar errores de build
             <View style={styles.formGroup}>
               <Text style={styles.formLabel}>Imagen del producto</Text>
               {newProduct.image ? (
@@ -507,6 +509,7 @@ const BusinessProductsScreen = ({ navigation, route }) => {
                 </>
               )}
             </View>
+            */}
             
             <View style={styles.formRow}>
               <View style={styles.formGroupHalf}>
