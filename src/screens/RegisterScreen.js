@@ -148,10 +148,13 @@ const RegisterScreen = ({ navigation }) => {
   return (
     <ScrollView style={globalStyles.container}>
       <View style={styles.container}>
-        {/* Logo pequeño */}
+        {/* Logo con ícono y texto */}
         <View style={styles.logoContainer}>
-          <Ionicons name="bicycle" size={50} color="#FF6B35" />
-          <Text style={styles.logoText}>RAPIFLOW</Text>
+          <View style={styles.logoIconContainer}>
+            <Ionicons name="flash" size={40} color="#FFFFFF" />
+          </View>
+          <Text style={styles.logoText}>RapiFlow</Text>
+          <Text style={styles.logoSubtext}>Rapidez con estilo cubano</Text>
         </View>
 
         {/* Formulario */}
@@ -404,11 +407,33 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     marginTop: 20,
   },
+  logoIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#FF6B35',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
   logoText: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#FF6B35',
-    marginTop: 5,
+    marginBottom: 5,
+  },
+  logoSubtext: {
+    fontSize: 14,
+    color: '#666666',
+    fontStyle: 'italic',
   },
   formContainer: {
     marginBottom: 30,
