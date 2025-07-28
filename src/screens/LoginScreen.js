@@ -124,7 +124,7 @@ const LoginScreen = ({ navigation }) => {
         {/* Logo con ícono y texto */}
         <View style={styles.logoContainer}>
           <View style={styles.logoIconContainer}>
-            <Ionicons name="bicycle" size={40} color="#FFFFFF" />
+            <Ionicons name="bicycle" size={40} color="#FF6B35" />
           </View>
           <Text style={styles.logoText}>RapiFlow</Text>
           <Text style={styles.logoSubtext}>Rapidez con estilo cubano</Text>
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 15,
