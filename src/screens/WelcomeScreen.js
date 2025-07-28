@@ -38,6 +38,8 @@ const WelcomeScreen = ({ navigation }) => {
           >
             <Text style={[styles.buttonText, styles.secondaryButtonText]}>Registrarse</Text>
           </TouchableOpacity>
+
+
         </View>
 
         {/* Servicios disponibles */}
@@ -125,6 +127,7 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: '#FFFFFF',
   },
+
   servicesContainer: {
     alignItems: 'center',
   },

@@ -504,7 +504,29 @@ const DriverProfileScreen = ({ navigation }) => {
           
           <Button
             mode="outlined"
-            onPress={() => Alert.alert('Cerrar sesión', 'Sesión cerrada exitosamente.')}
+            onPress={() => {
+              Alert.alert(
+                'Cerrar Sesión',
+                '¿Estás seguro de que quieres cerrar sesión?',
+                [
+                  {
+                    text: 'Cancelar',
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'Cerrar Sesión',
+                    style: 'destructive',
+                    onPress: () => {
+                      Alert.alert('Sesión cerrada', 'Has cerrado sesión exitosamente.');
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'Welcome' }],
+                      });
+                    },
+                  },
+                ]
+              );
+            }}
             style={styles.logoutButton}
             labelStyle={styles.logoutButtonText}
             icon="logout"

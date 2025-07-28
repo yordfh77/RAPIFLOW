@@ -3,8 +3,10 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'rea
 import { Card, Button, Badge, Switch, Avatar } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { theme, styles as globalStyles } from '../theme/theme';
+import { useAuth } from '../context/AuthContext';
 
 const DriverMainScreen = ({ navigation }) => {
+  const { clearUser } = useAuth();
   const [driverName] = useState('Carlos Rodríguez');
   const [isOnline, setIsOnline] = useState(true);
   const [currentLocation] = useState('Centro de Mayarí Arriba');
@@ -189,6 +191,14 @@ const DriverMainScreen = ({ navigation }) => {
     );
   };
 
+  const handleLogout = () => {
+    const confirmed = window.confirm('¿Realmente quieres salir?');
+    if (confirmed) {
+      clearUser();
+      navigation.navigate('Welcome');
+    }
+  };
+
   return (
     <View style={globalStyles.container}>
       {/* Header del conductor */}
@@ -201,12 +211,20 @@ const DriverMainScreen = ({ navigation }) => {
               <Text style={styles.locationText}>{currentLocation}</Text>
             </View>
           </View>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('DriverProfile')}
-            style={styles.profileButton}
-          >
-            <Avatar.Text size={40} label="CR" backgroundColor="#FFFFFF" color="#FF6B35" />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('DriverProfile')}
+              style={styles.profileButton}
+            >
+              <Avatar.Text size={40} label="CR" backgroundColor="#FFFFFF" color="#FF6B35" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleLogout}
+              style={styles.logoutButton}
+            >
+              <Ionicons name="log-out-outline" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
         </View>
         
         {/* Estado online/offline */}
@@ -558,8 +576,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginLeft: 5,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
   profileButton: {
     padding: 5,
+  },
+  logoutButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   statusContainer: {
     flexDirection: 'row',

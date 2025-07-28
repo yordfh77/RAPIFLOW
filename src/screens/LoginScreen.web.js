@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { loginUser, signInWithGoogle, validateEmail } from '../services/authService.web';
+import { loginUser, signInWithGoogle, validateEmail, USER_TYPES } from '../services/authService.web';
 import { theme } from '../theme/theme';
 
 const LoginScreen = ({ navigation }) => {
@@ -35,31 +35,42 @@ const LoginScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
+      console.log('=== LOGIN ATTEMPT ===');
+      console.log('Email:', email);
       const result = await loginUser(email, password);
+      console.log('Login result:', result);
       
       if (result.success) {
+        console.log('Login successful, user data:', result.user);
+        console.log('User type:', result.user.userType);
         updateUser(result.user);
         
         // Navegar según el tipo de usuario
         switch (result.user.userType) {
-          case 'client':
+          case USER_TYPES.CLIENT:
+            console.log('Navigating to ClientMain');
             navigation.replace('ClientMain');
             break;
-          case 'business':
+          case USER_TYPES.BUSINESS:
+            console.log('Navigating to BusinessMain');
             navigation.replace('BusinessMain');
             break;
-          case 'driver':
+          case USER_TYPES.DRIVER:
+            console.log('Navigating to DriverMain');
             navigation.replace('DriverMain');
             break;
           default:
+            console.log('Invalid user type:', result.user.userType);
             Alert.alert('Error', 'Tipo de usuario no válido');
         }
         
         Alert.alert('Éxito', `¡Bienvenido ${result.user.name}!`);
       } else {
+        console.log('Login failed:', result.error);
         Alert.alert('Error', result.error);
       }
     } catch (error) {
+      console.log('Login error:', error);
       Alert.alert('Error', 'Error inesperado al iniciar sesión');
     } finally {
       setLoading(false);
@@ -83,13 +94,13 @@ const LoginScreen = ({ navigation }) => {
           
           // Navegar según el tipo de usuario
           switch (result.user.userType) {
-            case 'client':
+            case USER_TYPES.CLIENT:
               navigation.replace('ClientMain');
               break;
-            case 'business':
+            case USER_TYPES.BUSINESS:
               navigation.replace('BusinessMain');
               break;
-            case 'driver':
+            case USER_TYPES.DRIVER:
               navigation.replace('DriverMain');
               break;
             default:

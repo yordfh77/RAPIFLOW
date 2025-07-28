@@ -5,9 +5,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme, styles as globalStyles } from '../theme/theme';
 import businessService from '../services/businessService';
 import { useAuth } from '../context/AuthContext';
+import { logoutUser } from '../services/authService';
 
 const ClientMainScreen = ({ navigation }) => {
-  const { getUserName, user, logout } = useAuth();
+  const { getUserName, user, clearUser } = useAuth();
   const userName = getUserName();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
@@ -160,28 +161,33 @@ const ClientMainScreen = ({ navigation }) => {
               <Avatar.Text size={40} label={getUserInitials()} backgroundColor="#FF6B35" />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => {
-                Alert.alert(
-                  'Cerrar Sesión',
-                  '¿Estás seguro de que quieres cerrar sesión?',
-                  [
-                    {
-                      text: 'Cancelar',
-                      style: 'cancel',
-                    },
-                    {
-                      text: 'Cerrar Sesión',
-                      style: 'destructive',
-                      onPress: () => {
-                        logout();
-                        navigation.reset({
-                          index: 0,
-                          routes: [{ name: 'Welcome' }],
-                        });
-                      },
-                    },
-                  ]
-                );
+              onPress={async () => {
+                console.log('🔴 Botón de salir presionado');
+                const confirmed = window.confirm('¿Realmente quieres salir?');
+                if (confirmed) {
+                  console.log('🔴 Iniciando logout...');
+                  try {
+                    const result = await logoutUser();
+                    console.log('🔴 Resultado logout:', result);
+                    if (result.success) {
+                      console.log('🔴 Limpiando usuario...');
+                      clearUser();
+                      console.log('🔴 Navegando a Welcome...');
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'Welcome' }],
+                      });
+                    } else {
+                      console.log('🔴 Error en logout:', result.error);
+                      window.alert('No se pudo cerrar sesión');
+                    }
+                  } catch (error) {
+                    console.log('🔴 Error catch:', error);
+                    window.alert('Error inesperado al cerrar sesión');
+                  }
+                } else {
+                  console.log('🔴 Logout cancelado');
+                }
               }}
               style={styles.logoutButton}
             >
@@ -261,7 +267,7 @@ const ClientMainScreen = ({ navigation }) => {
               <Card style={[styles.businessCard, !business.isOpen && styles.businessCardClosed]}>
                 <Card.Content>
                   <View style={styles.businessHeader}>
-                    <Ionicons name="storefront" size={24} color={business.isOpen ? "#FF6B35" : "#CCCCCC"} />
+                    <Ionicons name="business" size={24} color={business.isOpen ? "#FF6B35" : "#CCCCCC"} />
                     <View style={styles.businessRating}>
                       <Ionicons name="star" size={14} color="#FFD700" />
                       <Text style={styles.ratingText}>{business.rating}</Text>
@@ -291,7 +297,7 @@ const ClientMainScreen = ({ navigation }) => {
               ))
             ) : (
               <View style={styles.emptyContainer}>
-                <Ionicons name="storefront-outline" size={48} color="#CCCCCC" />
+                <Ionicons name="business-outline" size={48} color="#CCCCCC" />
                 <Text style={styles.emptyText}>No hay negocios disponibles</Text>
                 <Text style={styles.emptySubtext}>Desliza hacia abajo para actualizar</Text>
               </View>

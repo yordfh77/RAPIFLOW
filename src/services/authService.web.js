@@ -6,7 +6,12 @@ import {
   onAuthStateChanged,
   updateProfile,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider
 } from 'firebase/auth';
 import { 
   doc, 
@@ -19,13 +24,112 @@ import { GOOGLE_CONFIG } from '../config/googleConfig';
 
 // Tipos de usuario disponibles
 export const USER_TYPES = {
-  CLIENT: 'client',
-  BUSINESS: 'business',
-  DRIVER: 'driver'
+  CLIENT: 'cliente',
+  BUSINESS: 'negocio',
+  DRIVER: 'repartidor'
 };
 
 // Función para registrar un nuevo usuario
-export const registerUser = async (email, password, name, userType, additionalData = {}) => {
+export const registerUser = async (userData) => {
+  try {
+    console.log('=== AUTHSERVICE.WEB: Iniciando registro ===');
+    console.log('Datos recibidos:', userData);
+    
+    const { email, password, name, phone, address, userType, businessName, businessType, vehicleType, licenseNumber } = userData;
+    
+    console.log('Creando usuario en Firebase Auth...');
+    // Crear usuario en Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    console.log('Usuario creado en Auth:', user.uid);
+    
+    console.log('Actualizando perfil del usuario...');
+    // Actualizar el perfil con el nombre
+    await updateProfile(user, {
+      displayName: name
+    });
+    
+    console.log('Preparando datos para Firestore...');
+    // Crear documento del usuario en Firestore
+    const userDocData = {
+      uid: user.uid,
+      name,
+      email,
+      phone,
+      address,
+      userType,
+      createdAt: new Date().toISOString(),
+      isActive: true,
+      profileComplete: true
+    };
+    
+    // Agregar campos específicos según el tipo de usuario
+    if (userType === USER_TYPES.BUSINESS) {
+      userDocData.businessName = businessName;
+      userDocData.businessType = businessType;
+      userDocData.businessInfo = {
+        isOpen: false,
+        rating: 0,
+        totalOrders: 0,
+        totalRevenue: 0,
+        categories: [],
+        description: '',
+        deliveryFee: 0,
+        minOrderValue: 0
+      };
+    } else if (userType === USER_TYPES.DRIVER) {
+      userDocData.vehicleType = vehicleType;
+      userDocData.licenseNumber = licenseNumber;
+      userDocData.driverInfo = {
+        isOnline: false,
+        rating: 0,
+        totalDeliveries: 0,
+        totalEarnings: 0,
+        isVerified: false
+      };
+    } else if (userType === USER_TYPES.CLIENT) {
+      userDocData.clientInfo = {
+        totalOrders: 0,
+        totalSpent: 0,
+        favoriteRestaurants: [],
+        addresses: [address],
+        paymentMethods: []
+      };
+    }
+    
+    console.log('Guardando documento en Firestore...');
+    console.log('Datos del documento:', userDocData);
+    await setDoc(doc(db, 'users', user.uid), userDocData);
+    console.log('Documento guardado exitosamente en Firestore');
+    
+    const successResult = {
+      success: true,
+      user: {
+        uid: user.uid,
+        email: user.email,
+        name,
+        userType
+      }
+    };
+    console.log('=== AUTHSERVICE.WEB: Registro completado exitosamente ===');
+    console.log('Resultado:', successResult);
+    return successResult;
+  } catch (error) {
+    console.error('=== AUTHSERVICE.WEB: Error en el registro ===');
+    console.error('Error completo:', error);
+    console.error('Código de error:', error.code);
+    console.error('Mensaje de error:', error.message);
+    const errorResult = {
+      success: false,
+      error: getErrorMessage(error.code)
+    };
+    console.log('Resultado de error:', errorResult);
+    return errorResult;
+  }
+};
+
+// Función para registrar un nuevo usuario (versión legacy para compatibilidad)
+export const registerUserLegacy = async (email, password, name, userType, additionalData = {}) => {
   try {
     // Crear usuario en Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -245,7 +349,7 @@ export const logoutUser = async () => {
     console.error('Error logging out:', error);
     return {
       success: false,
-      error: 'Error al cerrar sesión'
+      error: getErrorMessage(error.code)
     };
   }
 };
@@ -275,7 +379,7 @@ export const onAuthStateChange = (callback) => {
           callback(null);
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error('Error getting user data:', error);
         callback(null);
       }
     } else {
@@ -283,6 +387,40 @@ export const onAuthStateChange = (callback) => {
       callback(null);
     }
   });
+};
+
+// Función para obtener mensajes de error en español
+export const getErrorMessage = (errorCode) => {
+  const errorMessages = {
+    'auth/user-not-found': 'No se encontró una cuenta con este correo electrónico',
+    'auth/wrong-password': 'Contraseña incorrecta',
+    'auth/email-already-in-use': 'Ya existe una cuenta con este correo electrónico',
+    'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres',
+    'auth/invalid-email': 'Correo electrónico inválido',
+    'auth/user-disabled': 'Esta cuenta ha sido deshabilitada',
+    'auth/too-many-requests': 'Demasiados intentos fallidos. Intenta más tarde',
+    'auth/network-request-failed': 'Error de conexión. Verifica tu internet',
+    'auth/invalid-credential': 'Credenciales inválidas'
+  };
+  
+  return errorMessages[errorCode] || 'Ha ocurrido un error inesperado';
+};
+
+// Función para validar email
+export const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Función para validar contraseña
+export const validatePassword = (password) => {
+  return password.length >= 6;
+};
+
+// Función para validar teléfono cubano
+export const validateCubanPhone = (phone) => {
+  const cubanPhoneRegex = /^(\+53)?[5-8]\d{7}$/;
+  return cubanPhoneRegex.test(phone.replace(/\s/g, ''));
 };
 
 // Función para actualizar el perfil del usuario
@@ -306,7 +444,7 @@ export const updateUserProfile = async (userId, updates) => {
     console.error('Error updating user profile:', error);
     return {
       success: false,
-      error: 'Error al actualizar el perfil'
+      error: getErrorMessage(error.code)
     };
   }
 };
@@ -330,40 +468,7 @@ export const getUserData = async (userId) => {
     console.error('Error fetching user data:', error);
     return {
       success: false,
-      error: 'Error al obtener datos del usuario'
+      error: getErrorMessage(error.code)
     };
   }
-};
-
-// Función para obtener mensajes de error en español
-const getErrorMessage = (errorCode) => {
-  const errorMessages = {
-    'auth/user-not-found': 'Usuario no encontrado',
-    'auth/wrong-password': 'Contraseña incorrecta',
-    'auth/email-already-in-use': 'El email ya está en uso',
-    'auth/weak-password': 'La contraseña es muy débil',
-    'auth/invalid-email': 'Email inválido',
-    'auth/user-disabled': 'Usuario deshabilitado',
-    'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde',
-    'auth/network-request-failed': 'Error de conexión',
-    'auth/popup-closed-by-user': 'Ventana de autenticación cerrada',
-    'auth/popup-blocked': 'Ventana emergente bloqueada por el navegador'
-  };
-  
-  return errorMessages[errorCode] || 'Error desconocido';
-};
-
-// Funciones de validación
-export const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-export const validatePassword = (password) => {
-  return password.length >= 6;
-};
-
-export const validateCubanPhone = (phone) => {
-  const cubanPhoneRegex = /^(\+53)?[5-8]\d{7}$/;
-  return cubanPhoneRegex.test(phone.replace(/\s/g, ''));
 };

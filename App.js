@@ -73,6 +73,7 @@ function AppNavigator() {
             component={WelcomeScreen} 
             options={{ headerShown: false }}
           />
+
           <Stack.Screen 
             name="Login" 
             component={LoginScreen} 
